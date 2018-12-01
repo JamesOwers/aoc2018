@@ -3,6 +3,7 @@ import os
 from my_utils.tests import test_function
 
 
+
 def part_1():
     """Function which calculates the solution to part 1
     
@@ -27,11 +28,12 @@ def part_2():
     return None
 
 
-def main(test_datas, functions, puzzle_input=None, test_functions=None):
+def main(test_datas, functions, puzzle_input=None, test_functions=None,
+         expand=False):
     if test_functions is None:
         test_functions = functions
     for ii, (test_data, fun) in enumerate(zip(test_datas, test_functions)):
-        nr_errors = test_function(fun, test_data)
+        nr_errors = test_function(fun, test_data, expand)
         if nr_errors == 0:
             print('Pt. {} Tests Passed'.format(ii+1))
 
@@ -56,7 +58,7 @@ if __name__ == "__main__":
     }
     
     # Code to import the actual puzzle input
-    with open('./inputs/day_x.txt') as f:
+    with open(f'./inputs/day_{DAY_NR}.txt') as f:
         puzzle_input = f.read().strip()
 #        puzzle_input = [line.rstrip('\n') for line in f]
 

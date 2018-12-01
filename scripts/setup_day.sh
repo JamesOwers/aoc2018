@@ -10,6 +10,9 @@ if [ $# -eq 0 ] || [ "$1" == "help" ] ; then
   exit
 fi
 
-PROJECT_HOME=$HOME/git/aoc2018
+YEAR=2018
+PROJECT_HOME=$HOME/git/aoc$YEAR
+wget https://adventofcode.com/$YEAR/day/$1/input \
+    --load-cookies=$PROJECT_HOME/cookies.txt \
+    -O $PROJECT_HOME/inputs/day_$1.txt
 cp $PROJECT_HOME/day_template.py $PROJECT_HOME/day_$1.py
-touch $PROJECT_HOME/inputs/day_$1.txt

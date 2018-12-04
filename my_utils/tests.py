@@ -1,3 +1,6 @@
+import os
+
+
 def test_function(fun, test_data, expand=False):
     """Utility function for testing
     
@@ -25,3 +28,19 @@ def test_function(fun, test_data, expand=False):
             print('fun({}) != {} (={})'.format(kk, vv, ans))
             nr_errors += 1
     return nr_errors
+
+
+def test_and_solve(test_datas, functions, puzzle_input=None, 
+                   test_functions=None, expand=False):
+    if test_functions is None:
+        test_functions = functions
+    for ii, (test_data, fun) in enumerate(zip(test_datas, test_functions)):
+        nr_errors = test_function(fun, test_data, expand)
+        if nr_errors == 0:
+            print('Pt. {} Tests Passed'.format(ii+1))
+
+    if puzzle_input is not None:
+        fn = os.path.basename(__file__)
+        for ii, fun in enumerate(functions):
+            ans = fun(puzzle_input)
+            print('{} Pt. {} Solution: {}'.format(fn, ii+1, ans))

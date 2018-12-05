@@ -2,6 +2,8 @@ from my_utils.tests import test_and_solve
 
 
 
+
+
 def part_1():
     """Function which calculates the solution to part 1
     
@@ -45,12 +47,8 @@ if __name__ == "__main__":
 #        puzzle_input = f.read().strip()
         puzzle_input = [line.rstrip('\n') for line in f]
 
-    # Main call: performs testing and calculates puzzle outputs
+    # Performs testing and calculates puzzle outputs
     test_and_solve(test_datas=[test_data1],
                    functions=[part_1],
                    puzzle_input=None,
                    test_functions=None)
-
-    # main(test_datas=[test_data1, test_data2],
-    #      functions=[part_1, part_2],
-    #      puzzle_input=puzzle_input)

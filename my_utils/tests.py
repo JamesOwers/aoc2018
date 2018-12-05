@@ -40,7 +40,6 @@ def test_and_solve(test_datas, functions, puzzle_input=None,
             print('Pt. {} Tests Passed'.format(ii+1))
 
     if puzzle_input is not None:
-        fn = os.path.basename(__file__)
         for ii, fun in enumerate(functions):
             ans = fun(puzzle_input)
-            print('{} Pt. {} Solution: {}'.format(fn, ii+1, ans))
+            print('Pt. {} Solution: {}'.format(ii+1, ans))

@@ -4,7 +4,7 @@ from my_utils.tests import test_and_solve
 
 
 
-def part_1():
+def part_1(puzzle_input):
     """Function which calculates the solution to part 1
     
     Arguments
@@ -16,7 +16,7 @@ def part_1():
     return None
 
 
-def part_2():
+def part_2(puzzle_input):
     """Function which calculates the solution to part 2
     
     Arguments
@@ -48,7 +48,7 @@ if __name__ == "__main__":
         puzzle_input = [line.rstrip('\n') for line in f]
 
     # Performs testing and calculates puzzle outputs
-    test_and_solve(test_datas=[test_data1],
-                   functions=[part_1],
-                   puzzle_input=None,
+    test_and_solve(test_datas=[test_data1, test_data2],
+                   functions=[part_1, part_2],
+#                   puzzle_input=puzzle_input,
                    test_functions=None)

@@ -41,5 +41,8 @@ def test_and_solve(test_datas, functions, puzzle_input=None,
 
     if puzzle_input is not None:
         for ii, fun in enumerate(functions):
-            ans = fun(puzzle_input)
+            if expand:
+                ans = fun(*puzzle_input)
+            else:
+                ans = fun(puzzle_input)
             print('Pt. {} Solution: {}'.format(ii+1, ans))

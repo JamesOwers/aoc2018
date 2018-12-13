@@ -1,5 +1,6 @@
 from my_utils.tests import test_and_solve
 from collections import defaultdict
+import sys
 
 
 DAY_NR = 13
@@ -19,16 +20,12 @@ def parse_input(puzzle_input):
     return tube_dict
 
 
-def find_direction(position, direction, tube_dict):
-    perp_direction = (direction[1], direction[0])
-    next_position = tuple(a+b for a, b in zip(position, perp_direction))
-    if next_position in tube_dict:
-        if tube_dict[next_position] == ' ':
-            return (-perp_direction[0], -perp_direction[1])
-        else:
-            return perp_direction
-    else:
-        raise ValueError()
+def find_direction(position, prev_direction, tracks):
+    if tracks[position] == '\\':
+        return prev_direction[1], prev_direction[0]
+    if tracks[position] == '/':
+        return -prev_direction[1], -prev_direction[0]
+    
 
 
 DIRECTIONS = {
@@ -69,7 +66,7 @@ def show_tracks(tracks):
     return track_str
 
 
-def part_1(puzzle_input, max_iters=1000):
+def part_1(puzzle_input, max_iters=1000, verbose=False):
     """Function which calculates the solution to part 1
     
     Arguments
@@ -86,7 +83,7 @@ def part_1(puzzle_input, max_iters=1000):
     carts = {}
     for ii, jj in [(ii, jj) for ii in range(nr_rows) for jj in range(nr_cols)]:
         if tracks[(ii, jj)] in DIRECTIONS:
-            carts[(ii, jj)] = {'crossroads': {}, 'prev_char': None}
+            carts[(ii, jj)] = {'crossroads': 0, 'prev_char': None}
     for tick in range(max_iters):
         for ii, jj in sorted(carts):
             prev_position = (ii, jj)
@@ -96,19 +93,16 @@ def part_1(puzzle_input, max_iters=1000):
             if tracks[position] in DIRECTIONS:
                 return f"{position[1]},{position[0]}"
             elif tracks[position] == '+':
-                crossroads_dict = carts[prev_position]['crossroads']
-                if position not in crossroads_dict:
-                    carts[prev_position]['crossroads'][position] = 1
-                    turn = 'l'
-                else:
-                    turn = crossroads_direction(crossroads_dict[position])
-                    direction = lrs_to_nsew(turn, prev_direction)
-                    carts[prev_position]['crossroads'][position] += 1
+                turn = crossroads_direction(carts[prev_position]['crossroads'])
+                direction = lrs_to_nsew(turn, prev_direction)
+                carts[prev_position]['crossroads'] += 1
             elif tracks[position] in '-|':
                 direction = prev_direction
             elif tracks[position] in r'\/':
                 direction = find_direction(position, prev_direction, tracks)
             else:
+                print(f'{tick}, {prev_position}')
+                print(show_tracks(tracks))
                 return "Uh oh"
             
             # update tracks
@@ -117,13 +111,11 @@ def part_1(puzzle_input, max_iters=1000):
             compass_chars = [tracks[coord] for coord in compass_coords]
             if carts[prev_position]['prev_char'] is None:
                 # assumes no starting on a corner
-                if all([char != ' ' for char in compass_chars]):  # xrds
-                    prev_char = '+'
+                # nor on crossroads
+                if prev_direction[0] == 0:
+                    prev_char = '-'
                 else:
-                    if prev_direction[0] == 0:
-                        prev_char = '-'
-                    else:
-                        prev_char = '|'
+                    prev_char = '|' 
             else:
                 prev_char = carts[prev_position]['prev_char']
             
@@ -136,12 +128,13 @@ def part_1(puzzle_input, max_iters=1000):
             cart_char = CART_CHARS[direction]
             tracks[position] = cart_char
             
-            print(f'{tick}, {prev_position}')
-            print(show_tracks(tracks))
+            if verbose:
+                print(f'{tick}, {prev_position}')
+                print(show_tracks(tracks))
     return "fail"
 
 
-def part_2(puzzle_input):
+def part_2(puzzle_input, max_iters=1000, verbose=True):
     """Function which calculates the solution to part 2
     
     Arguments
@@ -150,7 +143,72 @@ def part_2(puzzle_input):
     Returns
     -------
     """
-    return None
+    tracks = defaultdict(lambda: ' ')  # only need this for easy n, s, e, w
+    puzzle_tracks = parse_input(puzzle_input)
+    tracks.update(puzzle_tracks)
+    nr_rows = max([kk[0] for kk in tracks.keys()]) + 1
+    nr_cols = max([kk[1] for kk in tracks.keys()]) + 1
+    carts = {}
+    for ii, jj in [(ii, jj) for ii in range(nr_rows) for jj in range(nr_cols)]:
+        if tracks[(ii, jj)] in DIRECTIONS:
+            # assumes no starting on a corner
+            # nor on crossroads
+            prev_direction = DIRECTIONS[tracks[(ii, jj)]]
+            if prev_direction[0] == 0:
+                    prev_char = '-'
+            else:
+                prev_char = '|'
+            carts[(ii, jj)] = {'crossroads': 0, 'prev_char': prev_char}
+                 
+    for tick in range(max_iters):
+        if len(carts) == 1:
+            jj, ii = list(carts.keys())[0]
+            return f'{jj},{ii}'
+        for ii, jj in sorted(carts):
+            prev_position = (ii, jj)
+            prev_direction = DIRECTIONS[tracks[prev_position]]
+            x0_dir, x1_dir = prev_direction
+            position = (ii+x0_dir, jj+x1_dir)
+            if tracks[position] in DIRECTIONS:
+                prev_char = carts[prev_position]['prev_char']
+                tracks[prev_position] = prev_char
+                prev_char = carts[position]['prev_char']
+                tracks[position] = prev_char
+                del carts[prev_position]
+                del carts[position]
+                continue
+            elif tracks[position] == '+':
+                turn = crossroads_direction(carts[prev_position]['crossroads'])
+                direction = lrs_to_nsew(turn, prev_direction)
+                carts[prev_position]['crossroads'] += 1
+            elif tracks[position] in '-|':
+                direction = prev_direction
+            elif tracks[position] in r'\/':
+                direction = find_direction(position, prev_direction, tracks)
+            else:
+                print(f'{tick}, {prev_position}')
+                print(show_tracks(tracks))
+                return "Uh oh"
+            
+            # update tracks
+            n, e, s, w = (ii-1, jj), (ii, jj+1), (ii+1, jj), (ii, jj-1)
+            compass_coords = [n, e, s, w]
+            compass_chars = [tracks[coord] for coord in compass_coords]
+            prev_char = carts[prev_position]['prev_char']
+            
+            new_cart = carts[prev_position]
+            new_cart['prev_char'] = tracks[position]
+            del carts[prev_position]
+            carts[position] = new_cart
+            
+            tracks[prev_position] = prev_char
+            cart_char = CART_CHARS[direction]
+            tracks[position] = cart_char
+            
+            if verbose:
+                print(f'{tick}, {prev_position}')
+                print(show_tracks(tracks))
+    return "fail"
 
 
 
@@ -165,13 +223,21 @@ if __name__ == "__main__":
 \-+-/  \-+--/
   \------/   
 """
+    tracks2 = r"""/>-<\  
+|   |  
+| /<+-\
+| | | v
+\>+</ |
+  |   ^
+  \<->/
+"""
     test_data1 = {
         'inputs': [tracks],
         'outputs': ['7,3']
     }
     test_data2 = {
-        'inputs': [],
-        'outputs': []
+        'inputs': [tracks2],
+        'outputs': ['6,4']
     }
     
     # Code to import the actual puzzle input

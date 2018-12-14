@@ -134,7 +134,7 @@ def part_1(puzzle_input, max_iters=1000, verbose=False):
     return "fail"
 
 
-def part_2(puzzle_input, max_iters=1000, verbose=True):
+def part_2(puzzle_input, max_iters=1000000, verbose=False):
     """Function which calculates the solution to part 2
     
     Arguments
@@ -162,10 +162,16 @@ def part_2(puzzle_input, max_iters=1000, verbose=True):
                  
     for tick in range(max_iters):
         if len(carts) == 1:
-            jj, ii = list(carts.keys())[0]
+            ii, jj = list(carts.keys())[0]
             return f'{jj},{ii}'
-        for ii, jj in sorted(carts):
-            prev_position = (ii, jj)
+        sorted_carts = sorted(carts)
+        if verbose:
+            print(sorted_carts)
+        for prev_position in sorted_carts:
+            if prev_position is None:
+                continue
+            else:
+                ii, jj = prev_position
             prev_direction = DIRECTIONS[tracks[prev_position]]
             x0_dir, x1_dir = prev_direction
             position = (ii+x0_dir, jj+x1_dir)
@@ -176,6 +182,13 @@ def part_2(puzzle_input, max_iters=1000, verbose=True):
                 tracks[position] = prev_char
                 del carts[prev_position]
                 del carts[position]
+                sorted_carts[sorted_carts.index(prev_position)] = None
+                sorted_carts[sorted_carts.index(position)] = None
+                if verbose:
+                    print(f'{tick}, {prev_position}')
+                    print('CRASH!')
+                    print(show_tracks(tracks))
+                    print(sorted_carts)
                 continue
             elif tracks[position] == '+':
                 turn = crossroads_direction(carts[prev_position]['crossroads'])
@@ -191,15 +204,16 @@ def part_2(puzzle_input, max_iters=1000, verbose=True):
                 return "Uh oh"
             
             # update tracks
-            n, e, s, w = (ii-1, jj), (ii, jj+1), (ii+1, jj), (ii, jj-1)
-            compass_coords = [n, e, s, w]
-            compass_chars = [tracks[coord] for coord in compass_coords]
+#            n, e, s, w = (ii-1, jj), (ii, jj+1), (ii+1, jj), (ii, jj-1)
+#            compass_coords = [n, e, s, w]
             prev_char = carts[prev_position]['prev_char']
             
             new_cart = carts[prev_position]
             new_cart['prev_char'] = tracks[position]
             del carts[prev_position]
             carts[position] = new_cart
+            sorted_carts[sorted_carts.index(prev_position)] = position
+            
             
             tracks[prev_position] = prev_char
             cart_char = CART_CHARS[direction]
@@ -208,6 +222,7 @@ def part_2(puzzle_input, max_iters=1000, verbose=True):
             if verbose:
                 print(f'{tick}, {prev_position}')
                 print(show_tracks(tracks))
+                print(sorted_carts)
     return "fail"
 
 
@@ -248,5 +263,5 @@ if __name__ == "__main__":
     # Performs testing and calculates puzzle outputs
     test_and_solve(test_datas=[test_data1, test_data2],
                    functions=[part_1, part_2],
-#                   puzzle_input=puzzle_input,
+                   puzzle_input=puzzle_input,
                    test_functions=None)

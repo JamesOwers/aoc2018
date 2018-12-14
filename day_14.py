@@ -4,35 +4,6 @@ from my_utils.tests import test_and_solve
 DAY_NR = 14
 
 
-class DoublyLinkedListNode:
-    def __init__(self, value, next_node=None, prev_node=None):
-        self.value = value
-        self.next_node = next_node
-        self.prev_node = prev_node
-    
-    def insert_after(self, prev_node):
-        next_node = prev_node.next_node
-        next_node.prev_node = self
-        prev_node.next_node = self
-        self.prev_node = prev_node
-        self.next_node = next_node
-    
-    def pop(self):
-        self.prev_node.next_node = self.next_node
-        self.next_node.prev_node = self.prev_node
-        return self.value, self.next_node
-    
-    def print_list(self, max_print=20):
-        print(self.value, end='')
-        node = self.next_node
-        nr_print = 1
-        while node is not self and nr_print <= max_print:
-            print(f", {node.value}", end='')
-            node = node.next_node
-            nr_print += 1
-        print()
-
-
 def part_1(puzzle_input):
     """Function which calculates the solution to part 1
     
@@ -57,17 +28,6 @@ def part_1(puzzle_input):
         elf_2 = (elf_2 + recipe_scores[elf_2] + 1) % len(recipe_scores)
     return ''.join([f'{n}' for n in 
                     recipe_scores[puzzle_input:puzzle_input+10]])
-
-
-def check_match(puzzle_input, match_idx, check):
-    if puzzle_input[match_idx] == check:
-        match_idx += 1
-    else:
-        if puzzle_input[0] == check:
-            match_idx = 1
-        else:
-            match_idx = 0
-    return match_idx
     
 
 def part_2(puzzle_input):
@@ -84,24 +44,16 @@ def part_2(puzzle_input):
     recipe_scores = [3, 7]
     elf_1 = 0
     elf_2 = 1
-    match_idx = 0
-    while True:
+    while (recipe_scores[-N:] != puzzle_input and 
+           recipe_scores[-N-1:-1] != puzzle_input):
         score_sum = recipe_scores[elf_1] + recipe_scores[elf_2]
         if score_sum >= 10:
-            recipe_scores.append(1)
-            match_idx = check_match(puzzle_input, match_idx, 1)
-            if match_idx == N:
-                return len(recipe_scores) - len(puzzle_input)
-            recipe_scores.append(score_sum % 10)
-            match_idx = check_match(puzzle_input, match_idx, score_sum % 10)
+            recipe_scores.extend(divmod(score_sum, 10))
         else:
-            recipe_scores.append(score_sum)
-            match_idx = check_match(puzzle_input, match_idx, score_sum)
-        if match_idx == N:
-            return len(recipe_scores) - len(puzzle_input)
+            recipe_scores.append(score_sum % 10)
         elf_1 = (elf_1 + recipe_scores[elf_1] + 1) % len(recipe_scores)
         elf_2 = (elf_2 + recipe_scores[elf_2] + 1) % len(recipe_scores)
-    
+    return len(recipe_scores) - len(puzzle_input)
 
 
 

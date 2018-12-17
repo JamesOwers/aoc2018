@@ -112,8 +112,7 @@ like clay
                 flowing.add(drip)
                 everything.add(drip)
             elif below not in clay and below not in stagnant:
-                drips.append(below)
-                drips.rotate(1)
+                drips.appendleft(below)
             elif ((left in everything or left == drips[-1])
                   and (right in everything or right == drips[-1])):
                 if left in flowing or right in flowing:
@@ -126,11 +125,9 @@ like clay
                     stagnant.add(drip)
                     everything.add(drip)
             elif right not in everything and right != drips[-1]:
-                drips.append(right)
-                drips.rotate(1)
+                drips.appendleft(right)
             elif left not in everything and left != drips[-1]:
-                drips.append(left)
-                drips.rotate(1)
+                drips.appendleft(left)
             else:
                 raise ValueError
         if (1, 500) not in flowing:
